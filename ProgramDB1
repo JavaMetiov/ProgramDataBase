@@ -1,0 +1,977 @@
+import java.io.*;
+import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class Main {
+
+    private final ArrayList<String> getFullUsers = new ArrayList<>();
+    private static final File myFile = new File("C:\\Windows\\Temp\\Users.txt");
+    private int row;
+    private final int column = 7; /* максимальное кол-во столбцов */
+    private int tempSelect;
+    private String[][] array;
+    private static final File tempFile = new File("C:\\Windows\\Temp\\tempFile.txt");
+    private final String roleUser = "User";
+    private final String roleCustomer = "Customer";
+    private final String roleAdmin = "Admin";
+    private final String roleProvider = "Provider";
+    private final String roleSuperAdmin = "Super_Admin";
+    private final String roleYes = "Yes";
+    private final String roleNo = "No";
+
+    public static void main(String[] args) throws IOException {
+        Main main = new Main();
+        System.out.println("Здравствуйте! Выберите соответствующую опцию меню для начала работы.");
+        boolean isTrue = true;
+        while (isTrue) {
+            System.out.println("\n   Главное меню\n\n1. Создать пользователя.\n2. Редактировать пользователя.\n3. Удалить пользователя.\n4. Вывести всех пользователей.\n5. Вывести информацию о пользователе.\n6. Выйти из программы.");
+            int mainMenu;
+            Scanner scanMainMenu = new Scanner(System.in);
+            try {
+                mainMenu = scanMainMenu.nextInt();
+            } catch (InputMismatchException ex) {
+                System.out.println("Ошибка!\nПожалуйста, введите цифру от 1 до 6\n чтобы выбрать соответствующую опцию меню.\nПопробуйте ещё раз.");
+                continue;
+            }
+            switch (mainMenu) {
+                case 1:
+                    main.addFullUser();
+                    break;
+                case 2:
+                    main.editUser();
+                    break;
+                case 3:
+                    main.deleteUser();
+                    break;
+                case 4:
+                    main.getAllUsers();
+                    break;
+                case 5:
+                    main.getAllAboutOneUser();
+                    break;
+                case 6:
+                    System.out.println("Вы успешно вышли из программы. Хорошего дня! :)");
+                    isTrue = false;
+                    break;
+                default:
+                    System.out.println("Ошибка!\nПожалуйста, введите цифру от 1 до 6\n чтобы выбрать соответствующую опцию меню.\nПопробуйте ещё раз.");
+                    break;
+            }
+        }
+    }
+
+    public void editUser() throws IOException {
+        getAllAboutOneUser();
+        System.out.println("Введите номер строки которую нужно изменить.");
+
+        boolean isTrue = true;
+
+        while (isTrue) {
+            int editNum;
+            String editUser;
+            Scanner editNumScan = new Scanner(System.in);
+            Scanner editUserScan = new Scanner(System.in);
+            try {
+                editNum = editNumScan.nextInt();
+            } catch (InputMismatchException ex) {
+                System.out.println("Ошибка.\nВведите существующий номер строки которую вы хотите изменить.");
+                continue;
+            }
+            switch (editNum) {
+                case 1:
+                    System.out.println("Введите фамилию");
+                    editUser = editUserScan.nextLine();
+
+                    Pattern surNamePattern = Pattern.compile("[^A-Za-zА-Яа-я]");
+                    Matcher surNameMatcher = surNamePattern.matcher(editUser);
+                    while (surNameMatcher.find() || editUser.length() > 15 || editUser.length() < 2) {
+                        System.out.println("Вы ввели некорректную Фамилию.\nФамилия состоит из букв русского, либо английского алфавитов от 2 до 15 символов.\nПопробуйте ещё раз.\nВведите фамилию:");
+                        Scanner alReady = new Scanner(System.in);
+                        editUser = alReady.next();
+                        surNameMatcher = surNamePattern.matcher(editUser);
+                    }
+
+                    array[tempSelect - 1][0] = editUser;
+                    System.out.println("Вы успешно изменили фамилию на " + editUser + ".");
+                    isTrue = false;
+                    break;
+                case 2:
+                    System.out.println("Введите имя");
+                    editUser = editUserScan.nextLine();
+
+                    Pattern namePattern = Pattern.compile("[^A-Za-zА-Яа-я]");
+                    Matcher nameMatcher = namePattern.matcher(editUser);
+                    while (nameMatcher.find() || editUser.length() > 15 || editUser.length() < 2) {
+                        System.out.println("Вы ввели некорректное имя\nИмя состоит из букв русского, либо английского алфавитов от 2 до 15 символов.\nПопробуйте ещё раз.\nВведите имя:");
+                        Scanner alReady = new Scanner(System.in);
+                        editUser = alReady.next();
+                        nameMatcher = namePattern.matcher(editUser);
+                    }
+
+                    array[tempSelect - 1][1] = editUser;
+                    System.out.println("Вы успешно изменили имя на " + editUser + ".");
+                    isTrue = false;
+                    break;
+                case 3:
+                    System.out.println("Введите email");
+                    editUser = editUserScan.nextLine();
+
+                    Pattern emailPattern = Pattern.compile(".+[@].+[.].+");
+                    Matcher emailMatcher = emailPattern.matcher(editUser);
+                    while (!emailMatcher.find()) {
+                        System.out.println("Вы ввели некорректный email\nПопробуйте ещё раз.\nВведите email:");
+                        Scanner alReady = new Scanner(System.in);
+                        editUser = alReady.next();
+                        emailMatcher = emailPattern.matcher(editUser);
+                    }
+
+                    array[tempSelect - 1][2] = editUser;
+                    isTrue = false;
+                    break;
+                case 4:
+                    String roleYesOrNo = "Yes";
+                    String roleFinal = null;
+
+                    System.out.println("Выберите роль пользователя:\n1. User\n2. Customer\n3. Admin\n4. Provider\n5. Super_Admin");
+
+                    while (isTrue) {
+                        int roleSelection;
+                        Scanner selection = new Scanner(System.in);
+                        try {
+                            roleSelection = selection.nextInt();
+                        } catch (InputMismatchException ex) {
+                            System.out.println("Введите номер строки роли которое вы хотите выбрать для пользователя.");
+                            continue;
+                        }
+                        switch (roleSelection) {
+                            case 1:
+                                roleFinal = roleUser;
+                                isTrue = false;
+                                break;
+                            case 2:
+                                roleFinal = roleCustomer;
+                                isTrue = false;
+                                break;
+                            case 3:
+                                roleFinal = roleAdmin;
+                                isTrue = false;
+                                break;
+                            case 4:
+                                roleFinal = roleProvider;
+                                isTrue = false;
+                                break;
+                            case 5:
+                                roleFinal = roleSuperAdmin;
+                                isTrue = false;
+                                break;
+                            default:
+                                System.out.println("Вам доступны лишь текущие 5 вариантов. Пожалуйста, попробуйте ещё раз. Введите цифру от 1 до 5.");
+                                break;
+                        }
+                    }
+                    if (roleFinal.equals(roleUser) || roleFinal.equals(roleCustomer) || roleFinal.equals(roleAdmin) || roleFinal.equals(roleProvider)) {
+                        System.out.println("У Вас есть возможность присвоить пользователю дополнительную роль. Хотите ли добавить?\n1. Да\n2. Нет");
+                        isTrue = true;
+                        while (isTrue) {
+                            int roleSelection;
+                            Scanner selection = new Scanner(System.in);
+                            try {
+                                roleSelection = selection.nextInt();
+                            } catch (InputMismatchException ex) {
+                                System.out.println("Введите номер строки которое вы хотите выбрать при редактировании пользователя.");
+                                continue;
+                            }
+
+                            switch (roleSelection) {
+                                case 1:
+                                    roleYesOrNo = roleYes;
+                                    isTrue = false;
+                                    break;
+                                case 2:
+                                    roleYesOrNo = roleNo;
+                                    isTrue = false;
+                                    break;
+                                default:
+                                    System.out.println("Вам доступны лишь текущие 2 варианта. Пожалуйста, попробуйте ещё раз. Введите цифру 1 или 2.");
+                                    break;
+                            }
+                        }
+                        if (roleYesOrNo.equals(roleYes)) {
+
+                            switch (roleFinal) {
+                                case roleUser:
+                                    System.out.println("Роль User может иметь одну из следующих ролей:\n1. Admin\n2. Provider");
+                                    isTrue = true;
+                                    while (isTrue) {
+                                        int roleSelection;
+                                        Scanner selection = new Scanner(System.in);
+                                        try {
+                                            roleSelection = selection.nextInt();
+                                        } catch (InputMismatchException ex) {
+                                            System.out.println("Введите номер строки роли которое вы хотите выбрать для пользователя.");
+                                            continue;
+                                        }
+
+
+                                        switch (roleSelection) {
+                                            case 1:
+                                                roleFinal = roleUser + " + " + roleAdmin;
+                                                isTrue = false;
+                                                break;
+                                            case 2:
+                                                roleFinal = roleUser + " + " + roleProvider;
+                                                isTrue = false;
+                                                break;
+                                            default:
+                                                System.out.println("Вам доступны лишь текущие 2 варианта. Пожалуйста, попробуйте ещё раз. Введите цифру 1 или 2.");
+                                                break;
+                                        }
+                                    }
+                                    break;
+                                case roleCustomer:
+                                    System.out.println("Роль Customer может иметь одну из следующих ролей:\n1. Admin\n2. Provider");
+                                    isTrue = true;
+                                    while (isTrue) {
+                                        int roleSelection;
+                                        Scanner selection = new Scanner(System.in);
+                                        try {
+                                            roleSelection = selection.nextInt();
+                                        } catch (InputMismatchException ex) {
+                                            System.out.println("Введите номер строки роли которое вы хотите выбрать для пользователя.");
+                                            continue;
+                                        }
+
+                                        switch (roleSelection) {
+                                            case 1:
+                                                roleFinal = roleCustomer + " + " + roleAdmin;
+                                                isTrue = false;
+                                                break;
+                                            case 2:
+                                                roleFinal = roleCustomer + " + " + roleProvider;
+                                                isTrue = false;
+                                                break;
+                                            default:
+                                                System.out.println("Вам доступны лишь текущие 2 варианта. Пожалуйста, попробуйте ещё раз. Введите цифру 1 или 2.");
+                                                break;
+                                        }
+                                    }
+                                    break;
+                                case roleAdmin:
+                                    System.out.println("Роль Admin может иметь одну из следующих ролей:\n1. User\n2. Customer");
+                                    isTrue = true;
+                                    while (isTrue) {
+                                        int roleSelection;
+                                        Scanner selection = new Scanner(System.in);
+                                        try {
+                                            roleSelection = selection.nextInt();
+                                        } catch (InputMismatchException ex) {
+                                            System.out.println("Введите номер строки роли которое вы хотите выбрать для пользователя.");
+                                            continue;
+                                        }
+
+                                        switch (roleSelection) {
+                                            case 1:
+                                                roleFinal = roleUser + " + " + roleAdmin;
+                                                isTrue = false;
+                                                break;
+                                            case 2:
+                                                roleFinal = roleCustomer + " + " + roleAdmin;
+                                                isTrue = false;
+                                                break;
+                                            default:
+                                                System.out.println("Вам доступны лишь текущие 2 варианта. Пожалуйста, попробуйте ещё раз. Введите цифру 1 или 2.");
+                                                break;
+                                        }
+                                    }
+                                    break;
+                                case roleProvider:
+                                    System.out.println("Роль Provider может иметь одну из следующих ролей:\n1. User\n2. Customer");
+                                    isTrue = true;
+                                    while (isTrue) {
+                                        int roleSelection;
+                                        Scanner selection = new Scanner(System.in);
+                                        try {
+                                            roleSelection = selection.nextInt();
+                                        } catch (InputMismatchException ex) {
+                                            System.out.println("Введите номер строки роли которое вы хотите выбрать для пользователя.");
+                                            continue;
+                                        }
+
+
+                                        switch (roleSelection) {
+                                            case 1:
+                                                roleFinal = roleUser + " + " + roleProvider;
+                                                isTrue = false;
+                                                break;
+                                            case 2:
+                                                roleFinal = roleCustomer + " + " + roleProvider;
+                                                isTrue = false;
+                                                break;
+                                            default:
+                                                System.out.println("Вам доступны лишь текущие 2 варианта. Пожалуйста, попробуйте ещё раз. Введите цифру 1 или 2.");
+                                                break;
+                                        }
+
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                    array[tempSelect - 1][3] = roleFinal;
+                    System.out.println("Вы успешно изменили роль на " + roleFinal + ".");
+                    break;
+                case 5:
+                    System.out.println("Введите телефон");
+                    System.out.print("+375");
+                    editUser = editUserScan.nextLine();
+
+                    Pattern tel1Pattern1 = Pattern.compile("\\d{9}");
+                    Matcher tel1Matcher1 = tel1Pattern1.matcher(editUser);
+                    Pattern tel1Pattern2 = Pattern.compile("\\d{10}|\\D");
+                    Matcher tel1Matcher2 = tel1Pattern2.matcher(editUser);
+                    while (!tel1Matcher1.find() || tel1Matcher2.find()) {
+                        System.out.println("Вы ввели некорректный мобильный телефон\nПопробуйте ещё раз.\nВведите мобильный телефон:");
+                        Scanner alReady = new Scanner(System.in);
+                        System.out.print("+375");
+                        editUser = alReady.next();
+                        tel1Matcher1 = tel1Pattern1.matcher(editUser);
+                        tel1Matcher2 = tel1Pattern2.matcher(editUser);
+                    }
+                    if(!("+375" + editUser).equals(array[tempSelect - 1][5]) && !("+375" + editUser).equals(array[tempSelect - 1][6])) {
+                        array[tempSelect - 1][4] = "+375" + editUser;
+                        System.out.println("Вы успешно изменили номер телефона.");
+                    } else {
+                        System.out.println("Похоже такой номер телефона уже существует.");
+                    }
+                    isTrue = false;
+                    break;
+                case 6:
+                    String tempTel2 = array[tempSelect - 1][5];
+                    if (tempTel2 != null) {
+                        System.out.println("Введите телефон");
+                        System.out.print("+375");
+                        editUser = editUserScan.nextLine();
+
+                        Pattern tel2Pattern1 = Pattern.compile("\\d{9}");
+                        Matcher tel2Matcher1 = tel2Pattern1.matcher(editUser);
+                        Pattern tel2Pattern2 = Pattern.compile("\\d{10}|\\D");
+                        Matcher tel2Matcher2 = tel2Pattern2.matcher(editUser);
+                        while (!tel2Matcher1.find() || tel2Matcher2.find()) {
+                            System.out.println("Вы ввели некорректный мобильный телефон\nПопробуйте ещё раз.\nВведите мобильный телефон:");
+                            Scanner alReady = new Scanner(System.in);
+                            System.out.print("+375");
+                            editUser = alReady.next();
+                            tel2Matcher1 = tel2Pattern1.matcher(editUser);
+                            tel2Matcher2 = tel2Pattern2.matcher(editUser);
+                        }
+                        if(!("+375" + editUser).equals(array[tempSelect - 1][4]) && !("+375" + editUser).equals(array[tempSelect - 1][6])) {
+                            array[tempSelect - 1][5] = "+375" + editUser;
+                            isTrue = false;
+                            System.out.println("Вы успешно изменили номер телефона.");
+                        } else {
+                            System.out.println("Похоже такой номер телефона уже существует.");
+                            isTrue = false;
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        System.out.println("Вам доступны лишь текущие варианты. Пожалуйста, попробуйте ещё раз.");
+                        isTrue = false;
+                    }
+                    break;
+                case 7:
+                    String tempTel3 = array[tempSelect - 1][6];
+                    if (tempTel3 != null) {
+                        System.out.println("Введите телефон");
+                        System.out.print("+375");
+                        editUser = editUserScan.nextLine();
+
+                        Pattern tel3Pattern1 = Pattern.compile("(\\d{9})");
+                        Matcher tel3Matcher1 = tel3Pattern1.matcher(editUser);
+                        Pattern tel3Pattern2 = Pattern.compile("\\d{10}|\\D");
+                        Matcher tel3Matcher2 = tel3Pattern2.matcher(editUser);
+                        while (!tel3Matcher1.find() || tel3Matcher2.find()) {
+                            System.out.println("Вы ввели некорректный мобильный телефон\nПопробуйте ещё раз.\nВведите мобильный телефон:");
+                            Scanner alReady = new Scanner(System.in);
+                            System.out.print("+375");
+                            editUser = alReady.next();
+                            tel3Matcher1 = tel3Pattern1.matcher(editUser);
+                            tel3Matcher2 = tel3Pattern2.matcher(editUser);
+                        }
+                        if(!("+375" + editUser).equals(array[tempSelect - 1][4]) && !("+375" + editUser).equals(array[tempSelect - 1][5])) {
+                            array[tempSelect - 1][6] = "+375" + editUser;
+                            isTrue = false;
+                            System.out.println("Вы успешно изменили номер телефона.");
+                        } else {
+                            System.out.println("Похоже такой номер телефона уже существует.");
+                            isTrue = false;
+                        }
+                        break;
+                    }
+                    else
+            {
+                System.out.println("Вам доступны лишь текущие варианты. Пожалуйста, попробуйте ещё раз.");
+                isTrue = false;
+            }
+            break;
+                default:
+                    System.out.println("Вам доступны лишь текущие варианты. Пожалуйста, попробуйте ещё раз.");
+                    break;
+            }
+        }
+        // "writer" Не в самом начале, потому что удаляет содержимое файла перед последующей записью
+        PrintWriter writer = new PrintWriter(new FileWriter(myFile)); String[] locArray;
+        for (int i = 0; i < getFullUsers.size() ; i++) {
+            locArray = getFullUsers.get(i).split("-");
+            for (int j = 0; j < locArray.length; j++) {
+                writer.write(array[i][j]);
+                if(j < (locArray.length - 1))
+                {
+                    writer.write("-");
+                }
+            }
+            writer.write("\n");
+        }
+        writer.flush();
+        System.out.println("Пользователь успешно отредактирован.");
+    }
+
+    public void deleteUser() {
+        boolean isTrue = true;
+        getAllUsers();
+        while (isTrue) {
+            System.out.println("Стоку под каким номером вы хотите удалить?\nДля отмены операции введите '0'.");
+            int index;
+            Scanner deleteNumber = new Scanner(System.in);
+            try {
+                index = deleteNumber.nextInt() - 1;
+            } catch (InputMismatchException ex) {
+                System.out.println("Вы ввели не цифру. Пожалуйста, введите цифру от 0 до " + row + " для продолжения операции.");
+                continue;
+            }
+            if((index+1) > 0 && (index+1) <= row) {
+                try (BufferedReader reader1 = new BufferedReader(new FileReader(myFile)); PrintWriter writer1 = new PrintWriter(new FileWriter(tempFile))) {
+                    int current = 0;
+                    String line;
+                    while ((line = reader1.readLine()) != null) {
+                        if (current != index) {
+                            writer1.println(line);
+                        }
+                        current++;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try (BufferedReader reader2 = new BufferedReader(new FileReader(tempFile)); PrintWriter writer2 = new PrintWriter(new FileWriter(myFile))) {
+                    String line;
+                    while ((line = reader2.readLine()) != null) {
+                        writer2.println(line);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Строка под номером " + (index + 1) + " удалена.\nВывод текущего массива:");
+                getAllUsers();
+                isTrue = false;
+            } else if ((index+1) == 0) {
+                System.out.println("\nОтмена операции.\n");
+                isTrue = false;
+            } else {
+                System.out.println("Вы ввели несуществующую строку.\nПопробуйте ещё раз.");
+            }
+        }
+    }
+
+    private void getAllAboutOneUser() {
+        getAllUsers();
+        System.out.println("Какого пользователя выбрать для текущей операции?\n");
+        boolean isTrue = true;
+        while (isTrue) {
+            Scanner tempSelectUser = new Scanner(System.in);
+            tempSelect = 0;
+            try {
+                tempSelect = tempSelectUser.nextInt();
+            } catch (InputMismatchException ex) {
+                System.out.println("Вы ввели не число.\nПопробуйте ещё раз.\nВведите номер пользователя для получения полной информации.");
+                continue;
+            }
+            if (tempSelect > 0 && tempSelect <= row) {
+                String infoUser = "";
+                String[] locArray;
+                System.out.println("\nДанные пользователя.\n");
+                for (int i = tempSelect - 1; i < tempSelect; i++) {
+                    locArray = getFullUsers.get(i).split("-");
+                    for (int j = 0; j < locArray.length; j++) {
+                        if (j == 0)
+                            infoUser = "1. Фамилия";
+                        if (j == 1)
+                            infoUser = "2. Имя";
+                        if (j == 2)
+                            infoUser = "3. Email";
+                        if (j == 3)
+                            infoUser = "4. Роль";
+                        if (j == 4)
+                            infoUser = "5. phone1";
+                        if (j == 5)
+                            infoUser = "6. phone2";
+                        if (j == 6)
+                            infoUser = "7. phone3";
+                        System.out.println(infoUser + ": " + array[tempSelect - 1][j]);
+
+                    }
+                }
+                isTrue = false;
+            } else
+            {
+                System.out.println("Вы ввели номер несуществующего пользователя.\nПопробуйте ещё раз.\nВведите номер пользователя для получения полной информации.");
+            }
+        }
+    }
+
+    private void getAllUsers()
+    {
+            try {
+
+                BufferedReader reader = new BufferedReader(new FileReader("C:\\Windows\\Temp\\Users.txt"));
+                String line;
+
+                if (getFullUsers.size() != 0) {
+                        getFullUsers.clear();
+                }
+
+                while ((line = reader.readLine()) != null) {
+                    getFullUsers.add(line);
+                }
+
+                row = getFullUsers.size(); /* подсчитываю кол-во строк */
+
+                array = new String[row][column];
+                reader.close();
+            } catch (IOException e) {
+                System.out.println("Ошибка при чтении файла. Возможно его не существует.");
+            }
+
+            String[] locArray;
+            for (int i = 0; i < getFullUsers.size(); i++) {
+                locArray = getFullUsers.get(i).split("-");
+                for (int j = 0; j < locArray.length; j++) {
+                    array[i][j] = String.valueOf(locArray[j]);
+                }
+            }
+        System.out.println("\nСписок всех пользователей.\n");
+            for (int i = 0; i < row; i++) {
+                System.out.println((i + 1) + ". " + array[i][0] + " " + array[i][1]);
+            }
+            System.out.println();
+    }
+
+
+
+
+
+    private void addFullUser()
+    {
+
+        try {
+            String[] users = new String[7];
+
+            BufferedWriter user = new BufferedWriter(new FileWriter(myFile, true));
+
+            Scanner setUser = new Scanner(System.in);
+
+            //////////////////////////////////////////
+
+            {
+                System.out.println("Введите фамилию:");
+                String surName = setUser.nextLine();
+
+                Pattern pattern = Pattern.compile("[^A-Za-zА-Яа-я]");
+                Matcher matcher = pattern.matcher(surName);
+                while (matcher.find() || surName.length() > 15 || surName.length() < 2) {
+                    System.out.println("Вы ввели некорректную Фамилию.\nФамилия состоит из букв русского, либо английского алфавитов от 2 до 15 символов.\nПопробуйте ещё раз.\nВведите фамилию:");
+                    Scanner alReady = new Scanner(System.in);
+                    surName = alReady.next();
+                    matcher = pattern.matcher(surName);
+                }
+
+                users[0] = surName;
+                user.write(users[0]);
+            }
+
+            //////////////////////////////////////////
+
+            {
+                System.out.println("Введите имя:");
+                String name = setUser.nextLine();
+
+                Pattern pattern = Pattern.compile("[^A-Za-zА-Яа-я]");
+                Matcher matcher = pattern.matcher(name);
+                while (matcher.find() || name.length() > 15 || name.length() < 2) {
+                    System.out.println("Вы ввели некорректное имя\nИмя состоит из букв русского, либо английского алфавитов от 2 до 15 символов.\nПопробуйте ещё раз.\nВведите имя:");
+                    Scanner alReady = new Scanner(System.in);
+                    name = alReady.next();
+                    matcher = pattern.matcher(name);
+                }
+
+                users[1] = name;
+                user.write("-" + users[1]);
+            }
+
+            //////////////////////////////////////////
+
+            {
+                System.out.println("Введите email:");
+                String email = setUser.nextLine();
+
+                Pattern pattern = Pattern.compile(".+[@].+[.].+");
+                Matcher matcher = pattern.matcher(email);
+                while (!matcher.find()) {
+                    System.out.println("Вы ввели некорректный email\nПопробуйте ещё раз.\nВведите email:");
+                    Scanner alReady = new Scanner(System.in);
+                    email = alReady.next();
+                    matcher = pattern.matcher(email);
+                }
+
+                users[2] = email;
+                user.write("-" + users[2]);
+            }
+
+            //////////////////////////////////////////
+
+            {
+                String roleYesOrNo = "Yes";
+                String roleFinal = null;
+                boolean isTrue = true;
+
+                System.out.println("Выберите роль пользователя:\n1. User\n2. Customer\n3. Admin\n4. Provider\n5. Super_Admin");
+
+                while (isTrue) {
+                    int roleSelection;
+                    Scanner selection = new Scanner(System.in);
+                    try {
+                        roleSelection = selection.nextInt();
+                    } catch (InputMismatchException ex) {
+                        System.out.println("Введите номер строки роли которое вы хотите выбрать для пользователя.");
+                        continue;
+                    }
+                        switch (roleSelection) {
+                            case 1:
+                                roleFinal = roleUser;
+                                isTrue = false;
+                                break;
+                            case 2:
+                                roleFinal = roleCustomer;
+                                isTrue = false;
+                                break;
+                            case 3:
+                                roleFinal = roleAdmin;
+                                isTrue = false;
+                                break;
+                            case 4:
+                                roleFinal = roleProvider;
+                                isTrue = false;
+                                break;
+                            case 5:
+                                roleFinal = roleSuperAdmin;
+                                isTrue = false;
+                                break;
+                            default:
+                                System.out.println("Вам доступны лишь текущие 5 вариантов. Пожалуйста, попробуйте ещё раз. Введите цифру от 1 до 5.");
+                                break;
+                        }
+                }
+                if (roleFinal.equals(roleUser) || roleFinal.equals(roleCustomer) || roleFinal.equals(roleAdmin) || roleFinal.equals(roleProvider)) {
+                    System.out.println("У Вас есть возможность присвоить пользователю дополнительную роль. Хотите ли добавить?\n1. Да\n2. Нет");
+                    isTrue = true;
+                    while (isTrue) {
+                        int roleSelection;
+                        Scanner selection = new Scanner(System.in);
+                        try {
+                            roleSelection = selection.nextInt();
+                        } catch (InputMismatchException ex) {
+                            System.out.println("Введите номер строки которое вы хотите выбрать при создании пользователя.");
+                            continue;
+                        }
+
+                            switch (roleSelection) {
+                                case 1:
+                                    roleYesOrNo = roleYes;
+                                    isTrue = false;
+                                    break;
+                                case 2:
+                                    roleYesOrNo = roleNo;
+                                    isTrue = false;
+                                    break;
+                                default:
+                                    System.out.println("Вам доступны лишь текущие 2 варианта. Пожалуйста, попробуйте ещё раз. Введите цифру 1 или 2.");
+                                    break;
+                            }
+                    }
+                    if (roleYesOrNo.equals(roleYes)) {
+
+                        switch (roleFinal) {
+                            case roleUser:
+                                System.out.println("Роль User может иметь одну из следующих ролей:\n1. Admin\n2. Provider");
+                                isTrue = true;
+                                while (isTrue) {
+                                    int roleSelection;
+                                    Scanner selection = new Scanner(System.in);
+                                    try {
+                                        roleSelection = selection.nextInt();
+                                    } catch (InputMismatchException ex) {
+                                        System.out.println("Введите номер строки роли которое вы хотите выбрать для пользователя.");
+                                        continue;
+                                    }
+
+
+                                        switch (roleSelection) {
+                                            case 1:
+                                                roleFinal = roleUser + " + " + roleAdmin;
+                                                isTrue = false;
+                                                break;
+                                            case 2:
+                                                roleFinal = roleUser + " + " + roleProvider;
+                                                isTrue = false;
+                                                break;
+                                            default:
+                                                System.out.println("Вам доступны лишь текущие 2 варианта. Пожалуйста, попробуйте ещё раз. Введите цифру 1 или 2.");
+                                                break;
+                                        }
+                                }
+                                break;
+                            case roleCustomer:
+                                System.out.println("Роль Customer может иметь одну из следующих ролей:\n1. Admin\n2. Provider");
+                                isTrue = true;
+                                while (isTrue) {
+                                    int roleSelection;
+                                    Scanner selection = new Scanner(System.in);
+                                    try {
+                                        roleSelection = selection.nextInt();
+                                    } catch (InputMismatchException ex) {
+                                        System.out.println("Введите номер строки роли которое вы хотите выбрать для пользователя.");
+                                        continue;
+                                    }
+
+                                        switch (roleSelection) {
+                                            case 1:
+                                                roleFinal = roleCustomer + " + " + roleAdmin;
+                                                isTrue = false;
+                                                break;
+                                            case 2:
+                                                roleFinal = roleCustomer + " + " + roleProvider;
+                                                isTrue = false;
+                                                break;
+                                            default:
+                                                System.out.println("Вам доступны лишь текущие 2 варианта. Пожалуйста, попробуйте ещё раз. Введите цифру 1 или 2.");
+                                                break;
+                                        }
+                                }
+                                break;
+                            case roleAdmin:
+                                System.out.println("Роль Admin может иметь одну из следующих ролей:\n1. User\n2. Customer");
+                                isTrue = true;
+                                while (isTrue) {
+                                    int roleSelection;
+                                    Scanner selection = new Scanner(System.in);
+                                    try {
+                                        roleSelection = selection.nextInt();
+                                    } catch (InputMismatchException ex) {
+                                        System.out.println("Введите номер строки роли которое вы хотите выбрать для пользователя.");
+                                        continue;
+                                    }
+
+                                        switch (roleSelection) {
+                                            case 1:
+                                                roleFinal = roleUser + " + " + roleAdmin;
+                                                isTrue = false;
+                                                break;
+                                            case 2:
+                                                roleFinal = roleCustomer + " + " + roleAdmin;
+                                                isTrue = false;
+                                                break;
+                                            default:
+                                                System.out.println("Вам доступны лишь текущие 2 варианта. Пожалуйста, попробуйте ещё раз. Введите цифру 1 или 2.");
+                                                break;
+                                        }
+                                }
+                                break;
+                            case roleProvider:
+                                System.out.println("Роль Provider может иметь одну из следующих ролей:\n1. User\n2. Customer");
+                                isTrue = true;
+                                while (isTrue) {
+                                    int roleSelection;
+                                    Scanner selection = new Scanner(System.in);
+                                    try {
+                                        roleSelection = selection.nextInt();
+                                    } catch (InputMismatchException ex) {
+                                        System.out.println("Введите номер строки роли которое вы хотите выбрать для пользователя.");
+                                        continue;
+                                    }
+
+
+                                        switch (roleSelection) {
+                                            case 1:
+                                                roleFinal = roleUser + " + " + roleProvider;
+                                                isTrue = false;
+                                                break;
+                                            case 2:
+                                                roleFinal = roleCustomer + " + " + roleProvider;
+                                                isTrue = false;
+                                                break;
+                                            default:
+                                                System.out.println("Вам доступны лишь текущие 2 варианта. Пожалуйста, попробуйте ещё раз. Введите цифру 1 или 2.");
+                                                break;
+                                        }
+
+                                }
+                                break;
+                        }
+                    }
+                }
+                users[3] = roleFinal;
+                user.write("-" + users[3]);
+            }
+
+            //////////////////////////////////////////
+            {
+                boolean isTrue;
+                isTrue = true;
+                String tel1YesOrNo = "Yes";
+                String tel1Yes = "Yes";
+                String tel1No = "No";
+                String tel2YesOrNo = "Yes";
+                String tel2Yes = "Yes";
+                String tel2No = "No";
+                System.out.println("Введите мобильный телефон, как в этом примере +375(336789012):");
+                System.out.print("+375");
+                String phone1 = setUser.nextLine();
+
+                Pattern pattern = Pattern.compile("\\d{9}");
+                Matcher matcher = pattern.matcher(phone1);
+                Pattern pattern2 = Pattern.compile("\\d{10}|\\D");
+                Matcher matcher2 = pattern2.matcher(phone1);
+                while (!matcher.find() || matcher2.find()) {
+                    System.out.println("Вы ввели некорректный мобильный телефон\nПопробуйте ещё раз.\nВведите мобильный телефон:");
+                    Scanner alReady = new Scanner(System.in);
+                    System.out.print("+375");
+                    phone1 = alReady.next();
+                    matcher = pattern.matcher(phone1);
+                    matcher2 = pattern2.matcher(phone1);
+                }
+
+                users[4] = phone1;
+                user.write("-+375" + users[4]);
+
+
+                //////////////////////////////////////////
+                System.out.println("Есть ли у пользователя второй номер телефона?\n1. Да\n2. Нет");
+                while (isTrue) {
+                    int tel2Selection;
+                    Scanner selection = new Scanner(System.in);
+                    try {
+                        tel2Selection = selection.nextInt();
+                    } catch (InputMismatchException ex) {
+                        System.out.println("Введите номер строки которое вы хотите выбрать при создании пользователя.");
+                        continue;
+                    }
+
+                        switch (tel2Selection) {
+                            case 1:
+                                tel1YesOrNo = tel1Yes;
+                                isTrue = false;
+                                break;
+                            case 2:
+                                tel1YesOrNo = tel1No;
+                                isTrue = false;
+                                break;
+                            default:
+                                System.out.println("Вам доступны лишь текущие 2 варианта. Пожалуйста, попробуйте ещё раз. Введите цифру 1 или 2.");
+                                break;
+                        }
+                }
+                if (tel1YesOrNo.equals(tel1Yes)) {
+                    System.out.println("Введите второй мобильный телефон, как в этом примере +375(336789012):");
+                    System.out.print("+375");
+                    String phone2 = setUser.nextLine();
+
+                    pattern = Pattern.compile("\\d{9}");
+                    matcher = pattern.matcher(phone2);
+                    pattern2 = Pattern.compile("\\d{10}|\\D");
+                    matcher2 = pattern2.matcher(phone2);
+                    while (!matcher.find() || matcher2.find() || phone1.equals(phone2)) {
+                        System.out.println("Вы ввели некорректно, либо повторили мобильный телефон\nПопробуйте ещё раз.\nВведите второй мобильный телефон:");
+                        Scanner alReady = new Scanner(System.in);
+                        System.out.print("+375");
+                        phone2 = alReady.next();
+                        matcher = pattern.matcher(phone2);
+                        matcher2 = pattern2.matcher(phone2);
+                    }
+
+                    users[5] = phone2;
+                    user.write("-+375" + users[5]);
+
+                    //////////////////////////////////////////
+                    System.out.println("Есть ли у пользователя третий номер телефона?\n1. Да\n2. Нет");
+                    isTrue = true;
+                    while (isTrue) {
+                        int tel2Selection;
+                        Scanner selection = new Scanner(System.in);
+                        try {
+                            tel2Selection = selection.nextInt();
+                        } catch (InputMismatchException ex) {
+                            System.out.println("Введите номер строки которое вы хотите выбрать при создании пользователя.");
+                            continue;
+                        }
+
+                            switch (tel2Selection) {
+                                case 1:
+                                    tel2YesOrNo = tel2Yes;
+                                    isTrue = false;
+                                    break;
+                                case 2:
+                                    tel2YesOrNo = tel2No;
+                                    isTrue = false;
+                                    break;
+                                default:
+                                    System.out.println("Вам доступны лишь текущие 2 варианта. Пожалуйста, попробуйте ещё раз. Введите цифру 1 или 2.");
+                                    break;
+                            }
+                    }
+                    if (tel2YesOrNo.equals(tel2Yes)) {
+                        System.out.println("Введите третий мобильный телефон, как в этом примере +375(336789012):");
+                        System.out.print("+375");
+                        String phone3 = setUser.nextLine();
+
+                        pattern = Pattern.compile("\\d{9}");
+                        matcher = pattern.matcher(phone3);
+                        pattern2 = Pattern.compile("\\d{10}|\\D");
+                        matcher2 = pattern2.matcher(phone3);
+                        while (!matcher.find() || phone1.equals(phone3) || phone2.equals(phone3) || matcher2.find()) {
+                            System.out.println("Вы ввели некорректно, либо повторили мобильный телефон\nПопробуйте ещё раз.\nВведите третий мобильный телефон:");
+                            Scanner alReady = new Scanner(System.in);
+                            System.out.print("+375");
+                            phone3 = alReady.next();
+                            matcher = pattern.matcher(phone3);
+                            matcher2 = pattern2.matcher(phone3);
+                        }
+
+                        users[6] = phone3;
+                        user.write("-+375" + users[6]);
+                    }
+                }
+            }
+            //////////////////////////////////////////
+            System.out.println("Вы успешно создали пользователя.");
+            user.newLine();
+            user.close();
+        } catch (IOException ex){
+            ex.printStackTrace();
+        }
+    }
+
+
+}
